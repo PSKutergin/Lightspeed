@@ -1,11 +1,12 @@
 
 import json
 import os
+import datetime
+from datetime import timedelta, date, datetime
+
 import opendatasets as od
 from sqlalchemy import create_engine
 import pandas as pd
-import datetime
-from datetime import timedelta, date, datetime
 from sqlalchemy import inspect
 
 today = date.today()
@@ -33,8 +34,8 @@ def generete_range(start_date, finish_date=today):
     all_date = list(
         pd.date_range(start_date,finish_date-timedelta(days=1),freq='d'))
     all_date = [str(date).split(' ')[0] for date in all_date]
-    l = len(all_date)
-    print(f'cформирован лист из {l} дат, между {start_date} - {finish_date}')
+    # l = len(all_date)
+    # print(f'cформирован лист из {l} дат, между {start_date} - {finish_date}')
     return all_date
 
 def clear_date(param_data):
@@ -42,14 +43,14 @@ def clear_date(param_data):
     return param_data.replace('-', '')
 
 def clear_dir_upload_file(path):
-    '''очистка содержимого папки для формирования файлов'''
+    '''очистка содержимого папки, для формирования файлов'''
     if os.path.isdir(path):
         for filename in os.listdir(path):
             file_path = os.path.join(path, filename)
             os.remove(file_path)
     else:
         os.makedirs(path)
-    return print(f'директория `{path}` готова для создания файлоф .csv')
+    # return print(f'директория `{path}` готова для создания файлоф .csv')
 
 def get_file_indir(path):
     '''возвращает лист с файлами из директории'''
@@ -59,14 +60,14 @@ def get_file_indir(path):
             file_path = os.path.join(path, filename)
             list_file.append(file_path)
     l = len(list_file)
-    print(f'получено `{l}` файлов .csv')
+    # print(f'получено `{l}` файлов .csv')
     return list_file
 
 def get_user_conf(name_file):
-    '''fet user param to conect in db'''
+    '''get user param to conect in db'''
     with open(name_file, 'r') as f:
         conf = json.load(f)
-    print(f'получены данные для подключения к SQL')
+    # print(f'получены данные для подключения к SQL')
     return conf
 
 def connect_sql(conf):
@@ -78,7 +79,7 @@ def connect_sql(conf):
     PORT = conf['PORT']
     con_string = f"postgresql+psycopg2://{LOGIN}:{PASSWORD}@{HOST}:{PORT}/{DB}"
     con = create_engine(con_string)
-    print(f'подключились к кабе `{DB}`')
+    # print(f'подключились к кабе `{DB}`')
     return con
 
 def insert_data_from_kaggle(conn, name_file, table_name):
@@ -86,9 +87,10 @@ def insert_data_from_kaggle(conn, name_file, table_name):
     try:
         atlantic = pd.read_csv(f'./hurricane-database/{name_file}', header = 0)
         atlantic.to_sql(table_name, conn, if_exists='replace', index=False)
-        print('успешно загрузили файлы из kaggle')
+        # print('успешно загрузили файлы из kaggle')
     except:
-        print('error')
+        # print('error')
+        pass
 
 def get_row_on_filter_from_sql(conn, param_data):
     param_data = clear_date(param_data)
@@ -118,7 +120,7 @@ def write_csv(path, array, param_data):
 
 # формируем файл для кажой из дат
 def createte_files(path, all_date):
-    '''формируем файлы для кажой из дат'''
+    '''формируем файлы для каждой из дат'''
     all_count = 0
     for date in all_date:
         
@@ -140,10 +142,10 @@ def check_excist_table(conn, table_report):
     '''проверяем наличие таблицы в базе'''
     insp = inspect(conn)
     if not table_report in insp.get_table_names():
-        print(f'таблицы {table_report} в базе нет')
+        # print(f'таблицы {table_report} в базе нет')
         return True
     else:
-        print(f'таблица {table_report} в базе есть')
+        # print(f'таблица {table_report} в базе есть')
         return False
 
 def check_table(conn, table_report, df):
@@ -198,7 +200,7 @@ def write_history(conn, table_report, csv):
                     "status" = '{statys}'
             '''
             sdf = conn.execute(strm)
-            print(f'удаляем последнюю запись, которая появилась повторно с id {id_}')
+            # print(f'удаляем последнюю запись, которая появилась повторно с id {id_}')
             strm = f'''
             update cyclones_history
                 set "date_end" = Null
@@ -208,7 +210,7 @@ def write_history(conn, table_report, csv):
                     group by "id") 
             '''
             sdf = conn.execute(strm)
-            print(f'обновляем предпоследнуюю запись с id {id_}')
+            # print(f'обновляем предпоследнуюю запись с id {id_}')
 
     df = read_csv(csv)
     id_ = df['id'].iloc[0]
@@ -240,7 +242,7 @@ def write_history(conn, table_report, csv):
         sdf = conn.execute(strm_2)
         # и добавляем новую запись
         df.to_sql(table_report, conn, if_exists='append', index=False)
-        print(f'делаем запись {table_report}')
+        # print(f'делаем запись {table_report}')
 
 # connect to sql
 conf = get_user_conf('conf.json')
