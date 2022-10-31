@@ -1,6 +1,8 @@
 
 # UPLOAD FILE
  - задача описана в файле [полученный по API kaggle](task.txt)
+
+ new line there
 ## установить окружение и библиотеки:
     >>> python -m venv .venv
     >>> . .venv/bin/activate
